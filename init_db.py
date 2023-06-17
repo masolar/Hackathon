@@ -31,8 +31,12 @@ if __name__ == '__main__':
     # Setup the users table
     cur.execute('DROP TABLE IF EXISTS users CASCADE;')
     cur.execute('CREATE TABLE users (_id serial NOT NULL PRIMARY KEY,'
-                                     'username varchar not null,'
-                                     'password varchar not null);')
+                                     'email varchar not null,'
+                                     'password varchar not null,'
+                                     'first_name varchar not null,'
+                                     'last_name varchar not null,'
+                                     'own_docs json,'
+                                     'shared_docs json);')
     
     # Setup the saved file information
     cur.execute('DROP TABLE IF EXISTS docs;') 
