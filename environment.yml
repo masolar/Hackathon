@@ -1,0 +1,8 @@
+name: hackathon
+channels:
+  - defaults
+dependencies:
+  - python=3.8
+  - tqdm
+  - psycopg2
+prefix: /home/masolar/miniconda3/envs/hackathon
