@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
         conn.commit()
 
-        filepaths = list(map(lambda x: os.path.join(args.data_folder, x), os.listdir(args.data_folder)))
+        filepaths = list(map(lambda x: os.path.join(args.data_folder, x), filter(lambda x: '.DS_Store' not in x, os.listdir(args.data_folder))))
 
         
         # Build up arguments for starmap
