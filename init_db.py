@@ -16,6 +16,29 @@ def parse_args(parser: ArgumentParser):
 
     return parser.parse_args()
 
+def parse_data(dict) -> tuple:
+    '''returns tuple in form (name, diastolic, systolic, timestamp)'''
+    return_val = ()
+    first_name = dict['entry'][0]['resource']['name'][0]['given'][0]
+    last_name = dict['entry'][0]['resource']['name'][0]['family']
+    name = "{} {}".format(first_name, last_name)
+    diastolic = []
+    systolic = []
+    time = []
+    names = []
+    
+    for i in range(len(dict['entry'])):
+        if (dict['entry'][i]['resource']['resourceType'] == 'Observation' and dict['entry'][i]['resource']['category'][0]['coding'][0]['code'] == 'vital-signs'):
+            if ('component' in dict['entry'][i]['resource'].keys()):
+                diastolic.append(return_val + (dict['entry'][i]['resource']['component'][0]['valueQuantity']['value'],)) # diastolic
+                systolic.append(return_val + (dict['entry'][i]['resource']['component'][1]['valueQuantity']['value'],)) # systolic
+                time.append(return_val + (dict['entry'][i]['resource']['effectiveDateTime'],))
+    
+    for _ in range(len(time)):
+        names.append(name)
+    return names, diastolic, systolic, time
+
+
 if __name__ == '__main__':
     args = parse_args(ArgumentParser())
     
@@ -78,3 +101,20 @@ if __name__ == '__main__':
                                         'diastolic int,'
                                         'PRIMARY KEY (user_name, recorded_time));')
         conn.commit()
+
+    if args.import_data:
+        filepaths = list(map(lambda x: os.path.join(args.data_folder, x), filter(lambda x: '.DS_Store' not in x, os.listdir(args.data_folder))))
+
+        
+        # Build up arguments for starmap
+        for filepath in tqdm(filepaths):
+            with open(filepath, 'r') as f:
+                
+                data = json.load(f) # Get the json from the file into a Python file
+                names, diastolic, systolic, times = parse_data(data)
+                test = json.dumps(data) # Convert back to JSON. Makes sure it's formatted correctly
+                for name, dia, sys, time in zip(names, diastolic, systolic, times):
+                    cur.execute(f'INSERT INTO fhir (user_name, recorded_time, systolic, diastolic) VALUES (%s, %s, %s, %s)', (name,time, sys, dia)) # Have to give a tuple, even in this case
+                    conn.commit()
+
+        
