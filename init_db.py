@@ -50,6 +50,7 @@ if __name__ == '__main__':
     conn.commit()
     
     # Setup the fhir data tables and import data, which may take a while
+    '''
     if args.import_data:
         cur.execute('DROP TABLE IF EXISTS fhir;')
         cur.execute('CREATE TABLE fhir (id serial NOT NULL PRIMARY KEY,'
@@ -67,4 +68,13 @@ if __name__ == '__main__':
                 data = json.load(f) # Get the json from the file into a Python file
                 test = json.dumps(data) # Convert back to JSON. Makes sure it's formatted correctly
                 cur.execute(f'INSERT INTO fhir (data) VALUES (%s)', (test,)) # Have to give a tuple, even in this case
+        conn.commit()
+    '''
+    if args.import_data:
+        cur.execute('DROP TABLE IF EXISTS fhir;')
+        cur.execute('CREATE TABLE fhir (user_name varchar NOT NULL,'
+                                        'recorded_time timestamp NOT NULL,'
+                                        'systolic int,'
+                                        'diastolic int,'
+                                        'PRIMARY KEY (user_name, recorded_time));')
         conn.commit()
