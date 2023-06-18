@@ -57,19 +57,25 @@ if __name__ == '__main__':
                                      'email varchar not null,'
                                      'password varchar not null,'
                                      'first_name varchar not null,'
-                                     'last_name varchar not null,'
-                                     'own_docs json,'
-                                     'shared_docs json);')
+                                     'last_name varchar not null);')
     
     # Setup the saved file information
-    cur.execute('DROP TABLE IF EXISTS docs;') 
-    cur.execute('CREATE TABLE docs (doc_id serial NOT NULL PRIMARY KEY,' 
-                                    'user_id serial NOT NULL,'
+    cur.execute('DROP TABLE IF EXISTS docs CASCADE;') 
+    cur.execute('CREATE TABLE docs (_id serial NOT NULL PRIMARY KEY,' 
                                     'file_link varchar NOT NULL,'
-                                    'preview_link varchar NOT NULL,'
-                                    'CONSTRAINT fk_user '
-                                    'FOREIGN KEY (user_id) '
-                                    'REFERENCES users(_id));')
+                                    'preview_link varchar NOT NULL);')
+    
+    # Set up the table holding the info about a user's docs
+    cur.execute('DROP TABLE IF EXISTS owned_docs;')
+    cur.execute('CREATE TABLE owned_docs (user_id integer references users (_id),'
+                                          'doc_id integer references docs (_id));')
+    
+    # Set up the table holding the docs a user has shared with another
+    cur.execute('DROP TABLE IF EXISTS shared_docs;')
+    cur.execute('CREATE TABLE shared_docs (user_id_1 integer references users (_id),'
+                                           'user_id_2 integer references users (_id),'
+                                           'doc_id integer references docs (_id));')
+
     conn.commit()
     
     # Setup the fhir data tables and import data, which may take a while
